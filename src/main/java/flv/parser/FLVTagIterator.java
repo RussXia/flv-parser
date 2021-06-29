@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
@@ -17,14 +18,14 @@ import java.util.Iterator;
  */
 public class FLVTagIterator implements Iterator<FLVTag> {
 
+    private int bufferSize = 8192;
+
     private final BufferedInputStream bis;
 
     private FLVTag currentTag;
 
-    private byte[] data;
-
-    public FLVTagIterator(BufferedInputStream bis) throws IOException {
-        this.bis = bis;
+    public FLVTagIterator(InputStream is) throws IOException {
+        this.bis = new BufferedInputStream(is, bufferSize);
         //check flv header
         FLVHeader flvHeader = FLVHeaderParser.parseHeader(bis);
         if (flvHeader == null || !flvHeader.isFlv()) {
@@ -39,6 +40,7 @@ public class FLVTagIterator implements Iterator<FLVTag> {
         byte[] previous = new byte[4];
         int i = bis.read(previous);
         if (i == -1) {
+            //System.out.println("read previous failed" );
             return false;
         }
         int previousSize = previous[3] & 0xFF | (previous[2] & 0xFF) << 8 | (previous[1] & 0xFF) << 16 | (previous[0] & 0xFF) << 24;
@@ -47,11 +49,13 @@ public class FLVTagIterator implements Iterator<FLVTag> {
         byte[] headerBytes = new byte[11];
         i = bis.read(headerBytes);
         if (i == -1) {
+            //System.out.println("read header failed");
             return false;
         }
         ByteBuffer byteBuffer = ByteBuffer.wrap(headerBytes);
         TagHeader tagHeader = TagHeader.build(byteBuffer);
         if (tagHeader == null) {
+            //System.out.println("build tag header failed");
             return false;
         }
         //data
@@ -59,6 +63,7 @@ public class FLVTagIterator implements Iterator<FLVTag> {
         byte[] data = new byte[dataSize];
         i = bis.read(data);
         if (i == -1) {
+            //System.out.println("read tag data failed");
             return false;
         }
 

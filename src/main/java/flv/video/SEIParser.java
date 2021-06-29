@@ -61,6 +61,9 @@ public class SEIParser {
      * @return 如果是sei类型，返回sei信息；否则返回null
      */
     public static List<String> parserSEI(byte[] data) {
+        if (!AVCParser.isAVCNalu(data)) {
+            return null;
+        }
         ByteBuffer byteBuffer = ByteBuffer.wrap(data);
 
         //跳过avc_nalu的判断

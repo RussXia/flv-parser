@@ -1,5 +1,6 @@
 import flv.model.FLVTag;
 import flv.parser.FLVTagIterator;
+import flv.video.SEIParser;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -23,7 +24,8 @@ public class Main {
             FLVTag tag = flvTagIterator.next();
             //提取里面的视频信息
             if (Objects.equals(tag.getHeader().getType(), (byte)9)) {
-                System.out.println(new String(tag.getData()));
+                //System.out.println(new String(tag.getData()));
+                System.out.println(SEIParser.parserSEI(tag.getData()));
             }
         }
     }

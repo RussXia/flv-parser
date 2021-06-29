@@ -49,9 +49,7 @@ public class FLVTagIterator implements Iterator<FLVTag> {
         if (i == -1) {
             return false;
         }
-        ByteBuffer byteBuffer = ByteBuffer.allocate(11);
-        byteBuffer.put(headerBytes);
-        byteBuffer.flip();
+        ByteBuffer byteBuffer = ByteBuffer.wrap(headerBytes);
         TagHeader tagHeader = TagHeader.build(byteBuffer);
         if (tagHeader == null) {
             return false;

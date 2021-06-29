@@ -6,6 +6,9 @@ import com.google.common.collect.Lists;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import static flv.video.VideoConstant.NALU_TYPE_SEI;
+import static flv.video.VideoConstant.SEI_PAY_LOAD_TYPE;
+
 /**
  * User: RuzzZZ
  * Date: 2021/6/29
@@ -13,43 +16,42 @@ import java.util.List;
  */
 public class SEIParser {
 
-    /**
-     * FrameType(FT)  = 1 : Key Frame (for AVC, a seekable frame)
-     * = 2 : Inter Frame (for AVC, a non-seekable frame)
-     * = 3 : disposable inter frame (H.263 only)
-     * = 4 : generated keyframe (reserved for server use only)
-     * = 5 : video info/command frame
-     */
-    private static final int KEY_FRAME = 1;
-    private static final int INTER_FRAME = 2;
 
     /**
-     * CodecID(CID)  = 1 : JPEG (currently unused)
-     * = 2 : Sorenson H.263
-     * = 3 : Screen video
-     * = 4 : On2 VP6
-     * = 5 : On2 VP6 with alpha channel
-     * = 6 : Screen video version 2
-     * = 7 : H264/AVC
+     * 判断是否含有sei信息
+     *
+     * @param data flv中的video tag信息
+     * @return 是否含有sei信息
      */
-    private static final int H264_AVC = 7;
+    public static boolean hasSEIInfo(byte[] data) {
+        if (!AVCParser.isAVCNalu(data)) {
+            return false;
+        }
+        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
 
-    /**
-     * AVC package type(AVC PT)= 00 ：AVC Sequence Header
-     * = 01 ：AVC NALU
-     * = 02 : AVC end of sequence
-     */
-    private static final int AVC_NALU = 1;
+        //跳过avc_nalu的判断
+        byteBuffer.position(5);
 
-    /**
-     * NALU_TYPE_SEI   6      辅助增强信息 (SEI)
-     */
-    private static final int NALU_TYPE_SEI = 6;
+        while (byteBuffer.hasRemaining()) {
+            //nalu unit size
+            int naluUnitSize = byteBuffer.getInt();
+            byte[] unit = new byte[naluUnitSize];
+            byteBuffer.get(unit);
+            ByteBuffer unitBuffer = ByteBuffer.wrap(unit);
 
-    /**
-     * 目前只支持pay_load_type为5的元素的解析
-     */
-    private static final int SEI_PAY_LOAD_TYPE = 5;
+            //sei type
+            if ((int) unitBuffer.get() != NALU_TYPE_SEI) {
+                continue;
+            }
+            //pay load type
+            if ((int) unitBuffer.get() != SEI_PAY_LOAD_TYPE) {
+                continue;
+            }
+            //pay load size
+            return true;
+        }
+        return false;
+    }
 
 
     /**
@@ -59,55 +61,36 @@ public class SEIParser {
      * @return 如果是sei类型，返回sei信息；否则返回null
      */
     public static List<String> parserSEI(byte[] data) {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(data.length);
-        byteBuffer.put(data);
-        byteBuffer.flip();
+        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
 
-        byte videoHeader = byteBuffer.get();
-        //frame type
-        if (videoHeader >> 4 != KEY_FRAME && videoHeader >> 4 != INTER_FRAME) {
-            return null;
-        }
+        //跳过avc_nalu的判断
+        byteBuffer.position(5);
 
-        //codec id
-        if ((videoHeader & 0x0f) != H264_AVC) {
-            return null;
-        }
-
-        //avc格式，avc_packet_type为1时，表示AVC NALU
-        if ((int) byteBuffer.get() != AVC_NALU) {
-            return null;
-        }
-        //jump cts,si24
-        byteBuffer.get();
-        byteBuffer.get();
-        byteBuffer.get();
-
-        return parseSEIInfo(byteBuffer);
-    }
-
-    private static List<String> parseSEIInfo(ByteBuffer buffer) {
+        //解析nalu_unit数组
         List<String> seiList = Lists.newArrayList();
-        while (buffer.hasRemaining()) {
+        while (byteBuffer.hasRemaining()) {
             //nalu unit size
-            int naluUnitSize = buffer.getInt();
+            int naluUnitSize = byteBuffer.getInt();
+            byte[] unit = new byte[naluUnitSize];
+            byteBuffer.get(unit);
+            ByteBuffer unitBuffer = ByteBuffer.wrap(unit);
+
             //sei type
-            if ((int) buffer.get() != NALU_TYPE_SEI) {
+            if ((int) unitBuffer.get() != NALU_TYPE_SEI) {
                 return null;
             }
             //pay load type
-            if ((int) buffer.get() != SEI_PAY_LOAD_TYPE) {
+            if ((int) unitBuffer.get() != SEI_PAY_LOAD_TYPE) {
                 return null;
             }
             //pay load size
-            int payLoadSize = buffer.get();
-            byte[] data = new byte[payLoadSize];
-            buffer.get(data);
-            seiList.add(new String(data));
+            int payLoadSize = unitBuffer.get();
+            byte[] seiContent = new byte[payLoadSize];
+            unitBuffer.get(seiContent);
+            seiList.add(new String(seiContent));
             //0x80 结尾
-            byte rbspTrailingBits = buffer.get();
+            byte rbspTrailingBits = unitBuffer.get();
         }
         return seiList;
     }
-
 }

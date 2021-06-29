@@ -13,16 +13,13 @@ import java.nio.ByteBuffer;
  */
 public class FLVHeaderParser {
 
-    private static final byte[] _9_byte = new byte[9];
-
     public static FLVHeader parseHeader(BufferedInputStream bis) throws IOException {
+        byte[] _9_byte = new byte[9];
         int i = bis.read(_9_byte);
         if (i == -1) {
             return null;
         }
-        ByteBuffer byteBuffer = ByteBuffer.allocate(_9_byte.length);
-        byteBuffer.put(_9_byte);
-        byteBuffer.flip();
+        ByteBuffer byteBuffer = ByteBuffer.wrap(_9_byte);
         return new FLVHeader(byteBuffer);
     }
 }

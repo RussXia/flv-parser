@@ -1,5 +1,5 @@
-import flv.FLVTag;
-import parser.FLVTagIterator;
+import flv.model.FLVTag;
+import flv.parser.FLVTagIterator;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.util.Objects;
  * Date: 2021/6/28
  * Time: 19:41
  */
-public class DemoMain {
+public class Main {
 
     public static void main(String[] args) throws IOException {
         String urlStr = "http://1251952132.vod2.myqcloud.com/0ebf8881vodcq1251952132/069285f23701925919166709792/f0.flv";

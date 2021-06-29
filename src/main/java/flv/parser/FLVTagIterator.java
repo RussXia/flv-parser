@@ -1,9 +1,8 @@
-package parser;
+package flv.parser;
 
-import flv.FLVHeader;
-import flv.FLVTag;
-import flv.TagHeader;
-import lombok.Getter;
+import flv.model.FLVHeader;
+import flv.model.FLVTag;
+import flv.model.TagHeader;
 import lombok.SneakyThrows;
 
 import java.io.BufferedInputStream;
@@ -18,11 +17,10 @@ import java.util.Iterator;
  */
 public class FLVTagIterator implements Iterator<FLVTag> {
 
-    private BufferedInputStream bis;
+    private final BufferedInputStream bis;
 
     private FLVTag currentTag;
 
-    @Getter
     private byte[] data;
 
     public FLVTagIterator(BufferedInputStream bis) throws IOException {
@@ -43,10 +41,7 @@ public class FLVTagIterator implements Iterator<FLVTag> {
         if (i == -1) {
             return false;
         }
-        int previousSize = previous[3] & 0xFF |
-                (previous[2] & 0xFF) << 8 |
-                (previous[1] & 0xFF) << 16 |
-                (previous[0] & 0xFF) << 24;
+        int previousSize = previous[3] & 0xFF | (previous[2] & 0xFF) << 8 | (previous[1] & 0xFF) << 16 | (previous[0] & 0xFF) << 24;
 
         //header
         byte[] headerBytes = new byte[11];

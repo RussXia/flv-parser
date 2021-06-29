@@ -1,4 +1,4 @@
-package flv;
+package flv.model;
 
 
 import lombok.Builder;

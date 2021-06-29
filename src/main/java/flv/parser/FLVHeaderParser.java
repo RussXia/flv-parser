@@ -1,6 +1,6 @@
-package parser;
+package flv.parser;
 
-import flv.FLVHeader;
+import flv.model.FLVHeader;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

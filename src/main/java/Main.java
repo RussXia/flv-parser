@@ -3,6 +3,8 @@ import flv.model.FLVTag;
 import flv.parser.FLVTagIterator;
 import org.apache.commons.io.IOUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -23,7 +25,7 @@ public class Main {
                 .readTimeout(10000).connectTimeout(10000)
                 .stream();
 
-        //File file = new File("/Users/xmly/Downloads/demo-1.flv");
+        //File file = new File("/Users/xmly/Downloads/demo-2.flv");
         //FileInputStream is = new FileInputStream(file);
 
         //OkHttpClient client = new OkHttpClient();
@@ -36,6 +38,7 @@ public class Main {
         FLVTagIterator flvTagIterator = new FLVTagIterator(is);
         int count = 0;
         while (flvTagIterator.hasNext()) {
+            count++;
             FLVTag tag = flvTagIterator.next();
             System.out.println("timestamp:" + tag.getHeader().getTimestamp() + ",previous tag size:" + tag.getPreviousTagSize());
             ////提取里面的视频信息
@@ -48,6 +51,6 @@ public class Main {
             //}
         }
         IOUtils.closeQuietly(is);
-        System.out.println("video count :" + count);
+        System.out.println("total count :" + count);
     }
 }

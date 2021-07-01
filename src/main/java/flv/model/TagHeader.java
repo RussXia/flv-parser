@@ -39,6 +39,6 @@ public class TagHeader {
     }
 
     static int getTimeStamp(byte[] res) {
-        return res[2] & 0xff | res[1] & 0xff << 8 | res[0] & 0xff << 16;
+        return (res[2] & 0xff) | (res[1] << 8) & 0xff00 | (res[0] << 16) & 0xff0000 | (res[3] << 24) & 0xff000000;
     }
 }

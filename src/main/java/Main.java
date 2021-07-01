@@ -40,7 +40,9 @@ public class Main {
         while (flvTagIterator.hasNext()) {
             count++;
             FLVTag tag = flvTagIterator.next();
-            System.out.println("timestamp:" + tag.getHeader().getTimestamp() + ",previous tag size:" + tag.getPreviousTagSize());
+            System.out.println("timestamp:" + tag.getHeader().getTimestamp()
+                    + ",previous tag size:" + tag.getPreviousTagSize()
+                    + ",data size :" + tag.getHeader().getDataSize());
             ////提取里面的视频信息
             //if (Objects.equals((int) tag.getHeader().getType(), FLV_TAG_TYPE_VIDEO)) {
             //    count++;
